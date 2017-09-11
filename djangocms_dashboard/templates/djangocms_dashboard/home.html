@@ -1,0 +1,18 @@
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Tipo (Classe)</th>
+      <th>Quantidade</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for plugin_info in plugins_info %}
+    <tr>
+      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.name }}</a></td>
+      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.type }}</a></td>
+      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.amount }}</a></td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table> 

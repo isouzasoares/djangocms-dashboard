@@ -16,4 +16,6 @@ Including another URLconf
 from django.conf.urls import url
 
 urlpatterns = [
+    url(r'^$', 'djangocms_dashboard.views.home', name='home'),
+    url(r'^plugin_detail/(?P<plugin_type>\w+)$', 'djangocms_dashboard.views.plugin_detail', name='plugin_detail')
 ]

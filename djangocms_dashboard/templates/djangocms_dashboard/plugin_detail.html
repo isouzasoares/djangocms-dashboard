@@ -1,0 +1,26 @@
+<p>Nome: {{ name }}</p>
+<p>Tipo (Classe): {{ type }}</p>
+<p>Quantidade: {{ amount }}</p>
+{% for instance in instances %}
+<table>
+  <thead>
+    <tr>
+      <th>Título da Página</th>
+      <th>URL da Página</th>
+      <th>Placeholder</th>
+      <th colspan="3">Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ instance.title }}</td>
+      <td><a href="{{ instance.url}}" target="_blank">{{ instance.url }}</a></td>
+      <td>{{ instance.placeholder }}</td>
+
+      <td><a href="#">Ir</a></td>
+      <td><a href="#">Editar</a></td>
+      <td><a href="#">X</a></td>
+    </tr>
+  </tbody>
+</table>
+{% endfor %}

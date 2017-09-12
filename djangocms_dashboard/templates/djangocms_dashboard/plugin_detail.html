@@ -1,26 +1,33 @@
 <p>Nome: {{ name }}</p>
 <p>Tipo (Classe): {{ type }}</p>
 <p>Quantidade: {{ amount }}</p>
-{% for instance in instances %}
-<table>
+
+<table width="85%">
   <thead>
     <tr>
       <th>Título da Página</th>
       <th>URL da Página</th>
-      <th>Placeholder</th>
+      <th>Placeholder Label</th>
+      <th>Placeholder Static</th>
+      <th>Published</th>
       <th colspan="3">Ações</th>
     </tr>
   </thead>
   <tbody>
+{% for instance in instances %}
     <tr>
       <td>{{ instance.title }}</td>
       <td><a href="{{ instance.url}}" target="_blank">{{ instance.url }}</a></td>
-      <td>{{ instance.placeholder }}</td>
+      <td align="center">{{ instance.placeholder_label }}</td>
+      <td align="center">{% if instance.placeholder_static %} True {% else %} False {% endif %}</td>
+      <td align="center">{% if instance.not_published %} False {% else %} True {% endif %}</td>
 
-      <td><a href="#">Ir</a></td>
-      <td><a href="#">Editar</a></td>
-      <td><a href="#">X</a></td>
+      <td align="center">
+        <a class="js-cms-pagetree-page-view" href="{{ instance.url }}"><span>Ir</span></a>
+        <a class="cms-btn cms-btn-default js-cms-tree-advanced-settings cms-icon cms-icon-pencil" href="#"><span>Editar</span></a>
+        <a class="cms-icon cms-icon-bin" href="#">X</a></td>
     </tr>
+  {% endfor %}
   </tbody>
 </table>
-{% endfor %}
+

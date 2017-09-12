@@ -31,10 +31,13 @@ def plugin_detail(request, plugin_type):
         context['type'] = instances.first().plugin_type
         context['instances'] = []
         for i in instances:
+
             context['instances'].append({
                 'title': i.page.get_title(),
                 'url': u'/' + i.page.get_path(),
-                'placeholder': i.placeholder.get_label(),
+                'placeholder_label': i.placeholder.get_label(),
+                'placeholder_static': i.placeholder.is_static,
+                'not_published': i.page.publisher_is_draft,
             })
     # pages = [_.]
 

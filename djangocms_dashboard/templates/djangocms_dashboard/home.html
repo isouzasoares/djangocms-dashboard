@@ -1,4 +1,4 @@
-<table>
+<table width="50%">
   <thead>
     <tr>
       <th>Nome</th>
@@ -10,8 +10,8 @@
 {% for plugin_info in plugins_info %}
     <tr>
       <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.name }}</a></td>
-      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.type }}</a></td>
-      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.amount }}</a></td>
+      <td>{{ plugin_info.type }}</td>
+      <td align="center">{{ plugin_info.amount }}</td>
     </tr>
 {% endfor %}
   </tbody>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>APPHOOKS LIST</title>
+</head>
+<body>
+<table width="50%">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Classe</th>
+      <th>Quantidade</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for apphook_info in apphooks_info %}
+    <tr>
+      <td><a href="{{ apphook_info.url }}" target="_blank">{{ apphook_info.name }}</a></td>
+      <td>{{ apphook_info.class }}</td>
+      <td align="center">{{ apphook_info.amount }}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+</body>
+</html>

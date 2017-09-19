@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+{% load i18n cms_admin admin_urls %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }}</title>
+</head>
+<body>
+
+<p>Nome: {{ name }}</p>
+<p>Classe: {{ class }}</p>
+<p>Quantidade: {{ amount }}</p>
+
+<table width="85%">
+  <thead>
+    <tr>
+      <th>Título da Página</th>
+      <th>URL da Página</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for instance in instances %}
+    <tr>
+      <td>{{ instance.title }}</td>
+      <td>{{ instance.url }}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+</body>
+</html>

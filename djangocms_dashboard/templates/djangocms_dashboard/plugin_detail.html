@@ -1,3 +1,6 @@
+{% load i18n cms_admin admin_urls %}
+
+
 <p>Nome: {{ name }}</p>
 <p>Tipo (Classe): {{ type }}</p>
 <p>Quantidade: {{ amount }}</p>
@@ -17,15 +20,15 @@
 {% for instance in instances %}
     <tr>
       <td>{{ instance.title }}</td>
-      <td><a href="{{ instance.url}}" target="_blank">{{ instance.url }}</a></td>
+      <td>{{ instance.url }}</td>
       <td align="center">{{ instance.placeholder_label }}</td>
       <td align="center">{% if instance.placeholder_static %} True {% else %} False {% endif %}</td>
       <td align="center">{% if instance.not_published %} False {% else %} True {% endif %}</td>
 
       <td align="center">
         <a class="js-cms-pagetree-page-view" href="{{ instance.url }}"><span>Ir</span></a>
-        <a class="cms-btn cms-btn-default js-cms-tree-advanced-settings cms-icon cms-icon-pencil" href="#"><span>Editar</span></a>
-        <a class="cms-icon cms-icon-bin" href="#">X</a></td>
+        <a class="cms-btn cms-btn-default js-cms-tree-advanced-settings cms-icon cms-icon-pencil" href="{{ instance.edit_url }}" target="_blank"><span>Editar</span></a>
+        <a class="cms-icon cms-icon-bin" href="{{ instance.delete_url }}" target="_blank">X</a></td>
     </tr>
   {% endfor %}
   </tbody>

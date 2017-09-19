@@ -9,15 +9,19 @@ Detailed documentation is in the "docs" directory.
 Quick start
 -----------
 
-1. Add "djangocms_dashboard" to your INSTALLED_APPS setting like this::
+1. Install the package with:
+
+    pip install git@bitbucket.org:3mwdigital/djangocms-dashboard.git
+
+2. Add "djangocms_dashboard" to your INSTALLED_APPS setting like this::
 
     INSTALLED_APPS = [
         ...
         'djangocms_dashboard',
     ]
 
-2. Include the polls URLconf in your project urls.py like this::
+3. Include the polls URLconf in your project urls.py like this::
 
     url(r'^djangocms_dashboard/', include('djangocms_dashboard.urls')),
 
-3. Start the development server and visit http://127.0.0.1:8000/dashboard/
+4. Start the development server and visit http://127.0.0.1:8000/dashboard/

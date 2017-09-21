@@ -1,0 +1,20 @@
+.table {
+    padding: 8px;
+    line-height: 2.2;
+    vertical-align: top;
+    border-top: 1px solid #ddd
+}
+
+tbody tr{
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #e5e5ea;
+}
+
+tbody tr:hover{
+    background-color: black;
+    color: white;
+}

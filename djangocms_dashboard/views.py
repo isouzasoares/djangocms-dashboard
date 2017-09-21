@@ -10,7 +10,7 @@ try:
 except ImportError:
     from django.urls import reverse
 
-
+# TODO Reestruturar os codigos em classes.
 # class PluginsList(DetailView):
 #
 #     def get_queryset(self):
@@ -21,6 +21,9 @@ except ImportError:
 
 
 def home(request):
+    return render(request, 'djangocms_dashboard/home.html')
+
+def plugins_list(request):
     context = {}
     plugin_classes = plugin_pool.get_all_plugins()
     context['plugins_info'] = []
@@ -28,11 +31,15 @@ def home(request):
         plugin_info = {}
         plugin_info['name'] = unicode(plugin_class.name)
         plugin_info['type'] = unicode(plugin_class.__name__)
+        plugin_info['amount_published'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
+                                                                   placeholder__page__publisher_is_draft=False).count()
+        plugin_info['amount_draft'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
+                                                               placeholder__page__publisher_is_draft=True).count()
         plugin_info['amount'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type']).count()
         plugin_info['url'] = reverse('plugin_detail', kwargs={'plugin_type': plugin_info['type']})
         context['plugins_info'].append(plugin_info)
 
-    return render(request, 'djangocms_dashboard/home.html', context)
+    return render(request, 'djangocms_dashboard/plugins_list.html', context)
 
 
 def plugin_detail(request, plugin_type):
@@ -50,11 +57,11 @@ def plugin_detail(request, plugin_type):
         for i in instances:
     #TODO: arrumar URL (delete_url e edit_url hard coded)
             context['instances'].append({
-                'title': i.page.get_title(),
-                'url': u'/' + i.page.get_path(),
+                'title': i.page.get_title() if i.page else 'Placeholder Field',
+                'url': u'/' + i.page.get_path() if i.page else '',
                 'placeholder_label': i.placeholder.get_label(),
                 'placeholder_static': i.placeholder.is_static,
-                'not_published': i.page.publisher_is_draft,
+                'not_published': i.page.publisher_is_draft if i.page else '',
                 'delete_url': u'/admin/cms/page/delete-plugin/' + unicode(i.pk),
                 'edit_url': u'/admin/cms/page/edit-plugin/' + unicode(i.pk),
             })
@@ -71,8 +78,7 @@ def apphooks_list(request):
         apphook_info = {}
         apphook_info['name'] = unicode(apphook_tuple[1])
         apphook_info['class'] = unicode(apphook_tuple[0])
-        # TODO alterar publisher para FALSE
-        apphook_info['amount'] = Page.objects.filter(application_urls=apphook_tuple[0], publisher_is_draft=True).count()
+        apphook_info['amount'] = Page.objects.filter(application_urls=apphook_tuple[0], publisher_is_draft=False).count()
         apphook_info['url'] = reverse('apphook_detail', kwargs={'apphook_class': apphook_info['class']})
 
         context['apphooks_info'].append(apphook_info)
@@ -87,18 +93,17 @@ def get_apphook_class_name(apphook_obj):
 
 def apphook_detail(request, apphook_class):
     context = {}
-    # TODO alterar publisher para FALSE
-    pages = Page.objects.filter(application_urls=apphook_class, publisher_is_draft=True)
-    # TODO Pegar o nome do apphook
-    context['name'] = 'Nome'
+    pages = Page.objects.filter(application_urls=apphook_class, publisher_is_draft=False)
     context['class'] = apphook_class
     context['amount'] = pages.count()
+    context['instances'] = []
 
     if pages:
         for page in pages:
             context['instances'].append({
                 'title': page.get_title(),
                 'url': u'/' + page.get_path(),
+                'not_published': page.publisher_is_draft
             })
 
     return render(request, 'djangocms_dashboard/apphook_detail.html', context)

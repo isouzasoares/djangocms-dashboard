@@ -1,18 +1,11 @@
-<table width="50%">
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Tipo (Classe)</th>
-      <th>Quantidade</th>
-    </tr>
-  </thead>
-  <tbody>
-{% for plugin_info in plugins_info %}
-    <tr>
-      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.name }}</a></td>
-      <td>{{ plugin_info.type }}</td>
-      <td align="center">{{ plugin_info.amount }}</td>
-    </tr>
-{% endfor %}
-  </tbody>
-</table> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+  <p><a href="/dashboard/plugins">Lista de Plugins</a></p>
+  <p><a href="/dashboard/apphooks">Lista de Apphooks</a></p>
+</body>
+</html>

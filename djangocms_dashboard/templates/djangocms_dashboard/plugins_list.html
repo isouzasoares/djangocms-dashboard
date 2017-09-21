@@ -1,0 +1,32 @@
+{% load i18n static %}
+<link href="{% static 'css/style.css' %}" media="all" rel="stylesheet" type="text/css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Plugins</title>
+</head>
+<body>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Tipo (Classe)</th>
+      <th>Quantidade Publicada</th>
+      <th>Quantidade Rascunho</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for plugin_info in plugins_info %}
+    <tr>
+      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.name }}</a></td>
+      <td>{{ plugin_info.type }}</td>
+      <td align="center">{{ plugin_info.amount_published }}</td>
+      <td align="center">{{ plugin_info.amount_draft }}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 from cms.apphook_pool import apphook_pool
 from cms.models.pagemodel import Page
@@ -19,10 +20,12 @@ except ImportError:
 # plugins_list = PluginsList.as_view()
 
 
-
+@login_required(login_url='')
 def home(request):
     return render(request, 'djangocms_dashboard/home.html')
 
+
+@login_required()
 def plugins_list(request):
     context = {}
     plugin_classes = plugin_pool.get_all_plugins()
@@ -42,6 +45,7 @@ def plugins_list(request):
     return render(request, 'djangocms_dashboard/plugins_list.html', context)
 
 
+@login_required()
 def plugin_detail(request, plugin_type):
     context = {}
     # context['name'] = plugin_name
@@ -70,6 +74,7 @@ def plugin_detail(request, plugin_type):
     return render(request, 'djangocms_dashboard/plugin_detail.html', context)
 
 
+@login_required()
 def apphooks_list(request):
     context = {}
     apphook_tuples = apphook_pool.get_apphooks()
@@ -87,10 +92,12 @@ def apphooks_list(request):
     return render(request, 'djangocms_dashboard/apphooks_list.html', context)
 
 
+@login_required()
 def get_apphook_class_name(apphook_obj):
     return type(apphook_obj).__name__
 
 
+@login_required()
 def apphook_detail(request, apphook_class):
     context = {}
     pages = Page.objects.filter(application_urls=apphook_class, publisher_is_draft=False)

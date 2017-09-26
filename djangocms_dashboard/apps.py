@@ -5,3 +5,4 @@ from django.apps import AppConfig
 
 class DjangoCmsDashboardConfig(AppConfig):
     name = 'djangocms_dashboard'
+    verbose_name = "DjangoCMS's Dashboard"

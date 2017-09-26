@@ -1,0 +1,35 @@
+{% load i18n static %}
+<link href="{% static 'css/style.css' %}" media="all" rel="stylesheet" type="text/css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ class }}</title>
+
+    <h3><b>Classe:</b> {{ class }}</h3>
+    <h3><b>Quantidade:</b> {{ amount }}</h3>
+
+</head>
+<body>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Título da Página</th>
+      <th>URL da Página</th>
+      <th>Publicado</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for instance in instances %}
+    <tr>
+        <td>{{ instance.title }}</td>
+        <td>{{ instance.url }}</td>
+        <td align="center">{% if not instance.not_published %}x{% endif %}</td>
+        <td align="center"><a href="{{ instance.url }}" target="_blank"><span class="js-cms-pagetree-page-view" >Ir</span></a>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+</body>
+</html>

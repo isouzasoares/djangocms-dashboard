@@ -1,3 +1,7 @@
+### sqlite
+*.sqlite
+*.sqlite3
+
 ### Vagrant
 .vagrant
 Vagrantfile

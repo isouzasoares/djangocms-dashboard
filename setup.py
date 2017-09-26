@@ -12,8 +12,8 @@ setup(
     long_description=open('README.md', encoding='utf-8').read(),
     author='The Goodfellas',
     author_email='sidnei@thegoodfellas.com.br',
-    url='https://github.com/3mwdigital/djangocms-dashboard',
-    download_url='https://pypi.python.org/pypi/djangocms-dashboard',
+    url='https://bitbucket.org/3mwdigital/djangocms-dashboard',
+    # download_url='https://pypi.python.org/pypi/djangocms-dashboard',
     license='BSD 2',
     packages=find_packages(exclude=('tests.*', 'tests', 'example')),
     install_requires=[

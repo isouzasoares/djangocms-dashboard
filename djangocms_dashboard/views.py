@@ -5,6 +5,7 @@ from cms.apphook_pool import apphook_pool
 from cms.models.pagemodel import Page
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_pool import plugin_pool
+from .forms import DashboardFieldsForm, choices_comparation
 
 try:
     from django.core.urlresolvers import reverse
@@ -25,22 +26,41 @@ def home(request):
     return render(request, 'djangocms_dashboard/home.html')
 
 
-@login_required()
-def plugins_list(request):
-    context = {}
-    plugin_classes = plugin_pool.get_all_plugins()
+def get_plugins_list(context, all_plugins, comparation, range):
     context['plugins_info'] = []
-    for plugin_class in plugin_classes:
+    for plugin_class in all_plugins:
         plugin_info = {}
         plugin_info['name'] = unicode(plugin_class.name)
         plugin_info['type'] = unicode(plugin_class.__name__)
         plugin_info['amount_published'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
                                                                    placeholder__page__publisher_is_draft=False).count()
+        plugin_info['amount'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type']).count()
         plugin_info['amount_draft'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
                                                                placeholder__page__publisher_is_draft=True).count()
-        plugin_info['amount'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type']).count()
         plugin_info['url'] = reverse('plugin_detail', kwargs={'plugin_type': plugin_info['type']})
-        context['plugins_info'].append(plugin_info)
+
+        if not comparation or not range:
+            context['plugins_info'].append(plugin_info)
+        else:
+            if 'gte' in comparation:
+                context['plugins_info'].append(plugin_info) if plugin_info['amount'] > int(range) else None
+            elif 'lte' in comparation:
+                context['plugins_info'].append(plugin_info) if plugin_info['amount'] < int(range) else None
+            elif 'equ' in comparation:
+                context['plugins_info'].append(plugin_info) if plugin_info['amount'] == int(range) else None
+
+    return context
+
+@login_required()
+def plugins_list(request):
+    context = {}
+    plugin_classes = plugin_pool.get_all_plugins()
+    form = DashboardFieldsForm()
+    range = request.POST.get("range") or None
+    comparation = request.POST.get("comparation") or None
+
+    get_plugins_list(context, plugin_classes, comparation, range)
+    context.update({'forms': form})
 
     return render(request, 'djangocms_dashboard/plugins_list.html', context)
 

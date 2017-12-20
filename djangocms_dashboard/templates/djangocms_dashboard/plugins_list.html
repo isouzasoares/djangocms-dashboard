@@ -7,7 +7,13 @@
     <title>Lista de Plugins</title>
 </head>
 <body>
+<form method="POST">{% csrf_token %}
+    {{forms.comparation}}
+    <input type="number" value="{{forms.range}}" name="range">
+    <button type="submit">Submit</button>
+</form>
 <table class="table">
+
   <thead>
     <tr>
       <th>Nome</th>

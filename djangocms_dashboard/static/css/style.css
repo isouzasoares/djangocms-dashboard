@@ -5,16 +5,16 @@
     border-top: 1px solid #ddd
 }
 
-tbody tr{
+.table td{
     font-size: 18px;
     transition: all 0.2s;
 }
 
-tbody tr:nth-child(odd) {
+.table tr:nth-child(odd) {
     background-color: #e5e5ea;
 }
 
-tbody tr:hover{
+.table tr:hover{
     background-color: black;
     color: white;
 }

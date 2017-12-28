@@ -8,19 +8,22 @@
 </head>
 <body>
 <form >{% csrf_token %}
-    <table>
+    <table class="table-search">
         <tr>
             <td>{{ forms.keyword }}
+            </td>
+            <td>
+                <button type="submit">Buscar</button>
             </td>
         </tr>
 <tr></tr>
         <tr>
             <td>
-            {{forms.comparation}}
-            <input type="number" value="{{forms.range}}" name="range">
+                {{ forms.fields_search }}
+                {{forms.comparation}}
             </td>
             <td>
-            <button type="submit">Buscar</button>
+                <input type="number" value="{{forms.range}}" name="range">
             </td>
         </tr>
     </table>

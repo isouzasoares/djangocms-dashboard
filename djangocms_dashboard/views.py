@@ -40,18 +40,19 @@ class PluginsList(ListView):
             for plugin in plugins_list:
                 if keyword:
                     keyword = unicode(keyword)
-                    plugins_found.append(plugin) if limpar_nome(keyword) in (
-                    limpar_nome(plugin.name) or limpar_nome(plugin.plugin_type)) else None
+                    plugins_found.append(plugin) if limpar_nome(keyword) in limpar_nome(plugin.name) or limpar_nome(keyword) in limpar_nome(unicode(plugin.value)) else None
             return plugins_found
         return plugins_list
 
-    def filter_plugins(self, plugins_list, range, comparation):
+    def filter_plugins(self, plugins_list, range, comparation, fields):
         if range and comparation:
             plugins_filtered = []
 
             for plugin in plugins_list:
                 plugin.type = unicode(plugin.__name__)
-                plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type).count()
+                plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type, placeholder__page__publisher_is_draft=True).count() if 'draft' in fields else None
+                plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type, placeholder__page__publisher_is_draft=False).count() if 'published' in fields else CMSPlugin.objects.filter(plugin_type=plugin.type).count()
+
                 if 'gte' in comparation:
                     plugins_filtered.append(plugin) if plugin.amount > int(range) else None
                 elif 'lte' in comparation:
@@ -88,9 +89,9 @@ class PluginsList(ListView):
         range = self.request.GET.get("range") or None
         comparation = self.request.GET.get("comparation") or None
         keyword = self.request.GET.get("keyword") or None
-
+        fields = self.request.GET.get("fields_search") or None
         plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
-        plugins_filtered = self.filter_plugins(plugins_found, range, comparation)
+        plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
         qs = self.get_plugins_list(plugins_filtered)
 
         return qs

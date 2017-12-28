@@ -12,9 +12,6 @@
         <tr>
             <td>{{ forms.keyword }}
             </td>
-            <td>
-            <button type="submit">Buscar</button>
-            </td>
         </tr>
 <tr></tr>
         <tr>
@@ -23,7 +20,7 @@
             <input type="number" value="{{forms.range}}" name="range">
             </td>
             <td>
-            <button type="submit">Submit</button>
+            <button type="submit">Buscar</button>
             </td>
         </tr>
     </table>
@@ -47,8 +44,14 @@
       <td align="center">{{ object.amount_draft }}</td>
     </tr>
 {% endfor %}
+  {% if not object_list %}
+    <tr><td colspan="4">* NENHUM PLUGIN ENCONTRADO</td></tr>
+{% endif %}
+
   </tbody>
 </table>
+
+
 
 </body>
 </html>

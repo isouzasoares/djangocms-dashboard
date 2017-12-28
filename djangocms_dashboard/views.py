@@ -34,29 +34,33 @@ class PluginsList(ListView):
     template_name = 'djangocms_dashboard/plugins_list.html'
     model = CMSPlugin
 
-    def filter_plugins(self, keyword, plugins_list, range, comparation):
-        plugins_filtered = []
-        for plugin in plugins_list:
-            plugin.type = unicode(plugin.__name__)
-            plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type).count()
-            if keyword:
-                keyword = unicode(keyword)
-                plugins_filtered.append(plugin) if limpar_nome(keyword) in (
-                limpar_nome(plugin.name) or limpar_nome(plugin.plugin_type)) else None
+    def lookingfor_plugins(self, keyword, plugins_list):
+        if keyword:
+            plugins_found = []
+            for plugin in plugins_list:
+                if keyword:
+                    keyword = unicode(keyword)
+                    plugins_found.append(plugin) if limpar_nome(keyword) in (
+                    limpar_nome(plugin.name) or limpar_nome(plugin.plugin_type)) else None
+            return plugins_found
+        return plugins_list
 
-            elif range and comparation:
+    def filter_plugins(self, plugins_list, range, comparation):
+        if range and comparation:
+            plugins_filtered = []
+
+            for plugin in plugins_list:
+                plugin.type = unicode(plugin.__name__)
+                plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type).count()
                 if 'gte' in comparation:
-                    if plugin.amount > int(range):
-                        plugins_filtered.append(plugin)
-
+                    plugins_filtered.append(plugin) if plugin.amount > int(range) else None
                 elif 'lte' in comparation:
                     plugins_filtered.append(plugin) if plugin.amount < int(range) else None
                 elif 'equ' in comparation:
                     plugins_filtered.append(plugin) if plugin.amount == int(range) else None
-            else:
-                plugins_filtered = plugins_list
 
-        return plugins_filtered
+            return plugins_filtered
+        return plugins_list
 
     def get_plugins_list(self, plugins):
         plugins_to_show = []
@@ -72,7 +76,6 @@ class PluginsList(ListView):
             plugin_info['url'] = reverse('plugin_detail', kwargs={'plugin_type': plugin_info['type']})
             plugins_to_show.append(plugin_info)
 
-
         return plugins_to_show
 
     def get_context_data(self, **kwargs):
@@ -86,8 +89,9 @@ class PluginsList(ListView):
         comparation = self.request.GET.get("comparation") or None
         keyword = self.request.GET.get("keyword") or None
 
-        plugins = self.filter_plugins(keyword, plugin_pool.get_all_plugins(), range, comparation)
-        qs = self.get_plugins_list(plugins)
+        plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
+        plugins_filtered = self.filter_plugins(plugins_found, range, comparation)
+        qs = self.get_plugins_list(plugins_filtered)
 
         return qs
 
@@ -125,7 +129,6 @@ class PluginsDetail(DetailView):
     def get_object(self, queryset=None):
         plugin_type = self.kwargs.get('plugin_type')
         obj = CMSPlugin.objects.filter(plugin_type=plugin_type).first()
-        # obj = self.queryset.first()
         return obj
 
 

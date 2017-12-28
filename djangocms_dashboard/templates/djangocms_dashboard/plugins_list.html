@@ -7,10 +7,26 @@
     <title>Lista de Plugins</title>
 </head>
 <body>
-<form method="POST">{% csrf_token %}
-    {{forms.comparation}}
-    <input type="number" value="{{forms.range}}" name="range">
-    <button type="submit">Submit</button>
+<form >{% csrf_token %}
+    <table>
+        <tr>
+            <td>{{ forms.keyword }}
+            </td>
+            <td>
+            <button type="submit">Buscar</button>
+            </td>
+        </tr>
+<tr></tr>
+        <tr>
+            <td>
+            {{forms.comparation}}
+            <input type="number" value="{{forms.range}}" name="range">
+            </td>
+            <td>
+            <button type="submit">Submit</button>
+            </td>
+        </tr>
+    </table>
 </form>
 <table class="table">
 
@@ -23,12 +39,12 @@
     </tr>
   </thead>
   <tbody>
-{% for plugin_info in plugins_info %}
+{% for object in object_list %}
     <tr>
-      <td><a href="{{ plugin_info.url }}" target="_blank">{{ plugin_info.name }}</a></td>
-      <td>{{ plugin_info.type }}</td>
-      <td align="center">{{ plugin_info.amount_published }}</td>
-      <td align="center">{{ plugin_info.amount_draft }}</td>
+      <td><a href="{{ object.url }}" target="_blank">{{ object.name }}</a></td>
+      <td>{{ object.type }}</td>
+      <td align="center">{{ object.amount_published }}</td>
+      <td align="center">{{ object.amount_draft }}</td>
     </tr>
 {% endfor %}
   </tbody>

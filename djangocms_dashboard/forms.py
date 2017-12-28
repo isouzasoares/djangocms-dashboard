@@ -11,3 +11,4 @@ class DashboardFieldsForm(forms.Form):
     comparation = forms.ChoiceField(
         choices=choices_comparation,
         required=False)
+    keyword = forms.CharField(label="Busca", max_length=32)

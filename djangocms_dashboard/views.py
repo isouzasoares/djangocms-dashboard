@@ -24,8 +24,8 @@ def remover_acentos(txt):
 
 
 def limpar_nome(nome):
-    sem_espacoes = remover_espacos(nome)
-    return remover_acentos(sem_espacoes).lower()
+    sem_espacos = remover_espacos(unicode(nome))
+    return remover_acentos(sem_espacos).lower()
 
 
 

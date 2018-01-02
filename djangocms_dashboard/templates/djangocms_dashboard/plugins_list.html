@@ -71,7 +71,10 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
+
          var dashboards_ajax = function (url, qtd_items, qtd_items_listados) {
+             console.log(qtd_items);
+             console.log(qtd_items_listados);
             $.ajax({
                 dataType: "json",
                 url: url,
@@ -86,19 +89,20 @@
          }
 
 
-        var url = "{% url 'plugins_list' %}";
-        var qtd_items = 4;
+        var url = "{% url  'ajax_dashs:plugins_list' %}";
+        var qtd_items = 5;
         var qtd_items_listados = 0;
 
         dashboards_ajax(url, qtd_items, qtd_items_listados);
 
-        var plugin = $('#"tblDash-{{ instance.id }}');
+
+        var plugin = $('#tblDash-{{ instance.id }}');
 
 
         plugin.find('.carregar-mais').click(function () {
-            var qtd_items = $('#tblDash tr').length + 10;
+            var qtd_items = $('#tblDash tr').length + 5;
             var qtd_items_listados = $('#tblDash tr').length;
-            var url = "{% url 'plugins_list'  %}";
+            var url = "{% url 'ajax_dashs:plugins_list'  %}";
             dashboards_ajax(url, qtd_items, qtd_items_listados);
         });
 
@@ -110,7 +114,7 @@
 
             if (data.pluginsList.length > 0) {
 
-                $(clips).appendTo("#dashboards-{{ clip.id }}");
+{#                $(clips).appendTo("#dashboards-{{ clip.id }}");#}
 
                 if (data.pluginsList.length < 10) {
                     plugin.find('.carregar-mais').hide();

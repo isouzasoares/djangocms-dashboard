@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^dashboard/', include('djangocms_dashboard.urls')),
     url(r'^', include('cms.urls')),
+    url(r'^dashboard/', include('djangocms_dashboard.urls', namespace='ajax_dashs')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

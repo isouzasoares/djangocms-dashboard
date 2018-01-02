@@ -1,6 +1,5 @@
 from django.conf.urls import url
 
-
 urlpatterns = [
     url(r'^$', 'djangocms_dashboard.views.home', name='home'),
     url(r'^plugins/$', 'djangocms_dashboard.views.plugins_list', name='plugins_list'),

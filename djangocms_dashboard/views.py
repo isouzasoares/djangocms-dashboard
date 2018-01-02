@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 
@@ -86,6 +87,8 @@ class PluginsList(ListView):
         return context
 
     def get_queryset(self):
+        qtd_items_listados = self.request.GET.get("qtd_items_listados") or None
+        qtd_items = self.request.GET.get("qtd_items") or None
         range = self.request.GET.get("range") or None
         comparation = self.request.GET.get("comparation") or None
         keyword = self.request.GET.get("keyword") or None
@@ -93,8 +96,11 @@ class PluginsList(ListView):
         plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
         qs = self.get_plugins_list(plugins_filtered)
+        # paginator = Paginator(qs, 5)  # Show 25 contacts per page
+        # page = self.request.GET.get('page')
+        # contacts = paginator.get_page(page)
 
-        return qs
+        return qs[qtd_items_listados:qtd_items]
 
 plugins_list = PluginsList.as_view()
 

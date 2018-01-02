@@ -28,7 +28,7 @@
         </tr>
     </table>
 </form>
-<table class="table">
+<table class="table" id="tblDash-{{ instance.id }}">
 
   <thead>
     <tr>
@@ -54,7 +54,75 @@
   </tbody>
 </table>
 
-
+<div class="carregar-mais casa-color c-15">
+            <strong></strong>
+</div>
 
 </body>
 </html>
+
+
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous">
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+         var dashboards_ajax = function (url, qtd_items, qtd_items_listados) {
+            $.ajax({
+                dataType: "json",
+                url: url,
+                data: {
+                    'qtd_items': qtd_items,
+                    'qtd_items_listados': qtd_items_listados
+                },
+                success: function (response) {
+                    update_dashboards(response);
+                }
+            });
+         }
+
+
+        var url = "{% url 'plugins_list' %}";
+        var qtd_items = 4;
+        var qtd_items_listados = 0;
+
+        dashboards_ajax(url, qtd_items, qtd_items_listados);
+
+        var plugin = $('#"tblDash-{{ instance.id }}');
+
+
+        plugin.find('.carregar-mais').click(function () {
+            var qtd_items = $('#tblDash tr').length + 10;
+            var qtd_items_listados = $('#tblDash tr').length;
+            var url = "{% url 'plugins_list'  %}";
+            dashboards_ajax(url, qtd_items, qtd_items_listados);
+        });
+
+
+        plugin.find('.carregar-mais').hide();
+
+
+        var update_dashboards = function (data) {
+
+            if (data.pluginsList.length > 0) {
+
+                $(clips).appendTo("#dashboards-{{ clip.id }}");
+
+                if (data.pluginsList.length < 10) {
+                    plugin.find('.carregar-mais').hide();
+                } else {
+                    plugin.find('.carregar-mais').show();
+                    plugin.find('.carregar-mais strong').text('Carregar mais');
+                }
+            } else {
+                plugin.find('.carregar-mais').show();
+                plugin.find('.carregar-mais strong').text('Sem nada para carregar');
+            }
+        }
+    });
+
+</script>

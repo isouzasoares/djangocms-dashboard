@@ -18,3 +18,15 @@
     background-color: black;
     color: white;
 }
+
+
+.carregar-mais {
+    padding: 8px 0;
+    text-align: center;
+    text-transform: uppercase;
+    background: #e8e8e8;
+    cursor: pointer;
+    margin-top: 30px;
+    margin-bottom: 40px;
+    clear: both;
+}

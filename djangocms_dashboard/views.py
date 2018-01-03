@@ -104,7 +104,7 @@ class PluginsList(ListView):
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
         qs = self.get_plugins_list(plugins_filtered)
 
-        paginator = Paginator(qs, 1)
+        paginator = Paginator(qs, 10)
         page = self.request.GET.get('page')
         if page is None:
             page = 1

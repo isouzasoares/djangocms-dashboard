@@ -54,8 +54,8 @@
 <div class="pagination">
     <span class="step-links">
         {% if object_list.has_previous %}
-            <a href="?page=1">&laquo; </a>
-            <a href="?page={{ object_list.previous_page_number }}">Anterior</a>
+            <a href="?page=1{{parametros}}">&laquo; </a>
+            <a href="?page={{ object_list.previous_page_number }}{{parametros}}">Anterior</a>
         {% endif %}
 
        <span class="current">
@@ -63,8 +63,8 @@
         </span>
 
        {% if object_list.has_next %}
-            <a href="?page={{ object_list.next_page_number }}">Próxima</a>
-            <a href="?page={{ object_list.paginator.num_pages }}"> &raquo;</a>
+            <a href="?page={{ object_list.next_page_number }}{{parametros}}">Próxima</a>
+            <a href="?page={{ object_list.paginator.num_pages }}{{parametros}}"> &raquo;</a>
         {% endif %}
     </span>
 </div>

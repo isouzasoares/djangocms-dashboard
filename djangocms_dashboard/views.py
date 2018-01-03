@@ -83,7 +83,16 @@ class PluginsList(ListView):
     def get_context_data(self, **kwargs):
         context = super(PluginsList, self).get_context_data(**kwargs)
         form = DashboardFieldsForm()
-        context.update({'forms': form})
+
+        parametros = ''
+        for key in self.request.GET:
+            if key is not 'page' and key != 'page':
+                value = self.request.GET.get(key) or None
+                if value is not None:
+                    parametros += '&{key}={value}'.format(key=key, value=value)
+
+        context.update({'forms': form, 'parametros': parametros})
+
         return context
 
     def get_queryset(self):
@@ -95,7 +104,7 @@ class PluginsList(ListView):
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
         qs = self.get_plugins_list(plugins_filtered)
 
-        paginator = Paginator(qs, 10)
+        paginator = Paginator(qs, 1)
         page = self.request.GET.get('page')
         if page is None:
             page = 1

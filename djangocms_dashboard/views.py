@@ -87,8 +87,6 @@ class PluginsList(ListView):
         return context
 
     def get_queryset(self):
-        qtd_items_listados = self.request.GET.get("qtd_items_listados") or 0
-        qtd_items = self.request.GET.get("qtd_items") or 0
         range = self.request.GET.get("range") or None
         comparation = self.request.GET.get("comparation") or None
         keyword = self.request.GET.get("keyword") or None
@@ -97,7 +95,11 @@ class PluginsList(ListView):
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
         qs = self.get_plugins_list(plugins_filtered)
 
-        return qs[int(qtd_items_listados):int(qtd_items)]
+        paginator = Paginator(qs, 10)
+        page = self.request.GET.get('page')
+        if page is None:
+            page = 1
+        return paginator.page(page)
 
 plugins_list = PluginsList.as_view()
 

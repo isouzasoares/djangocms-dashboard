@@ -9,23 +9,20 @@
 <body>
 <form >{% csrf_token %}
     <table class="table-search">
-        <tr>
-            <td>{{ forms.keyword }}
-            </td>
-            <td>
-                <button type="submit">Buscar</button>
-            </td>
-        </tr>
-<tr></tr>
-        <tr>
-            <td>
-                {{ forms.fields_search }}
+        <div class="form-inline " style="padding-right: 10px;padding-top: 10px;padding-left: 10px;padding-bottom: 10px;background-color: #bdddf7;">
+            <img src="{% static 'busca.png' %}"style="margin-right: 5px; width: 20px; height: 20px;">
+            {{forms.keyword}}
+
+
+            <img src="{% static 'filtro.png' %}"style="margin-right: 5px; width: 20px; height: 20px;">
+            {{ forms.fields_search }}
                 {{forms.comparation}}
-            </td>
-            <td>
-                <input type="number" value="{{forms.range}}" name="range">
-            </td>
-        </tr>
+            <input type="number" value="{{forms.range}}" name="range" >
+
+
+            <button type="submit">Buscar</button>
+
+            </div>
     </table>
 </form>
 <table class="table">
@@ -57,17 +54,17 @@
 <div class="pagination">
     <span class="step-links">
         {% if object_list.has_previous %}
-            <a href="?page=1">&laquo; first</a>
-            <a href="?page={{ object_list.previous_page_number }}">previous</a>
+            <a href="?page=1">&laquo; </a>
+            <a href="?page={{ object_list.previous_page_number }}">Anterior</a>
         {% endif %}
 
        <span class="current">
-            Page {{ object_list.number }} of {{ object_list.paginator.num_pages }}.
+            Página {{ object_list.number }} de {{ object_list.paginator.num_pages }}.
         </span>
 
        {% if object_list.has_next %}
-            <a href="?page={{ object_list.next_page_number }}">next</a>
-            <a href="?page={{ object_list.paginator.num_pages }}">last &raquo;</a>
+            <a href="?page={{ object_list.next_page_number }}">Próxima</a>
+            <a href="?page={{ object_list.paginator.num_pages }}"> &raquo;</a>
         {% endif %}
     </span>
 </div>

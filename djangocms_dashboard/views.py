@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -9,6 +10,9 @@ from cms.plugin_pool import plugin_pool, PluginPool
 from .forms import DashboardFieldsForm
 from django.views.generic import DetailView, ListView
 from unicodedata import normalize
+import csv
+from django.http import HttpResponse
+
 
 try:
     from django.core.urlresolvers import reverse
@@ -95,6 +99,18 @@ class PluginsList(ListView):
 
         return context
 
+    def some_view(self):
+        # Cria o objeto HttpResponse com o cabeçalho CSV apropriado.
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
+
+        writer = csv.writer(response)
+        writer.writerow(['First row', 'Foo', 'Bar', 'Baz'])
+        writer.writerow(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
+
+        return response
+
+
     def get_queryset(self):
         range = self.request.GET.get("range") or None
         comparation = self.request.GET.get("comparation") or None
@@ -102,13 +118,18 @@ class PluginsList(ListView):
         fields = self.request.GET.get("fields_search") or None
         plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
+
         qs = self.get_plugins_list(plugins_filtered)
 
         paginator = Paginator(qs, 10)
         page = self.request.GET.get('page')
         if page is None:
             page = 1
+        self.some_view()
         return paginator.page(page)
+
+
+
 
 plugins_list = PluginsList.as_view()
 

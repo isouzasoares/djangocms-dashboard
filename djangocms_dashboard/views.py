@@ -29,7 +29,6 @@ def limpar_nome(nome):
 
 
 
-# @login_required()
 class PluginsList(ListView):
     template_name = 'djangocms_dashboard/plugins_list.html'
     model = CMSPlugin
@@ -99,7 +98,6 @@ class PluginsList(ListView):
 plugins_list = PluginsList.as_view()
 
 
-# @login_required()
 class PluginsDetail(DetailView):
     model = CMSPlugin
     template_name = 'djangocms_dashboard/plugin_detail.html'
@@ -141,7 +139,6 @@ def home(request):
     return render(request, 'djangocms_dashboard/home.html')
 
 
-# @login_required()
 class ApphooksList(ListView):
     template_name = 'djangocms_dashboard/apphooks_list.html'
     model = Page
@@ -168,7 +165,6 @@ class ApphooksList(ListView):
 
 apphooks_list = ApphooksList.as_view()
 
-# @login_required()
 class ApphooksDetail(DetailView):
     model = Page
     template_name = 'djangocms_dashboard/plugin_detail.html'

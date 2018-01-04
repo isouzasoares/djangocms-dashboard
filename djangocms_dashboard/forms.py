@@ -2,12 +2,12 @@
 
 from django import forms
 
-choices_comparation =(("gte", 'maior que'),
-                    ("lte", 'menor que'),
-                    ("equ", "igual a"))
-choices_fields = (("total", "Qtd Total"),
-                  ("draft", "Qtd Rascunho"),
-                  ("published", "Qtd Publicada"))
+choices_comparation =(("gte", 'Maior que'),
+                    ("lte", 'Menor que'),
+                    ("equ", "Igual a"))
+choices_fields = (("total", "Quantidade Total"),
+                  ("draft", "Quantidade Rascunho"),
+                  ("published", "Quantidade Publicada"))
 
 class DashboardFieldsForm(forms.Form):
     range = forms.IntegerField(label="Valor"),
@@ -18,4 +18,4 @@ class DashboardFieldsForm(forms.Form):
     comparation = forms.ChoiceField(
         choices=choices_comparation,
         required=False)
-    keyword = forms.CharField(label="Busca", max_length=32)
+    keyword = forms.CharField(label="Busca", max_length=32, widget=forms.TextInput(attrs={'placeholder': 'Palavra-chave'}))

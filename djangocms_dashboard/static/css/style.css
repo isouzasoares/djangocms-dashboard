@@ -18,3 +18,16 @@
     background-color: black;
     color: white;
 }
+
+.pagination {
+    display: inline-block;
+    color: black;
+    float: left;
+    padding: 8px 8px;
+    text-decoration: none;
+}
+
+.pagination a {
+    text-decoration: none;
+    color: black;
+}

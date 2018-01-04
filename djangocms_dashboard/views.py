@@ -7,6 +7,8 @@ from cms.apphook_pool import apphook_pool
 from cms.models.pagemodel import Page
 from cms.models.pluginmodel import CMSPlugin
 from cms.plugin_pool import plugin_pool, PluginPool
+from django.template.defaultfilters import slugify
+
 from .forms import DashboardFieldsForm
 from django.views.generic import DetailView, ListView
 from unicodedata import normalize
@@ -33,10 +35,50 @@ def limpar_nome(nome):
     return remover_acentos(sem_espacos).lower()
 
 
+class CSVResponseMixin(object):
+    csv_filename = 'csvfile.csv'
 
-class PluginsList(ListView):
+    def get_csv_filename(self):
+        return self.csv_filename
+
+    def render_to_csv(self, data):
+        print 1, data
+        output = []
+        response = HttpResponse(content_type='text/csv')
+        cd = 'attachment; filename="{0}"'.format(self.get_csv_filename())
+        response['Content-Disposition'] = cd
+
+
+
+        # writer = csv.writer(response)
+        # writer.writerow(['Nome', 'Tipo (Classe)', 'Quantidade Publicada', 'Quantidade Rascunho'])
+
+        # [int(v) for lst in data for k, v in lst.items()]
+            # output.append([ user.name])
+        # CSV Data
+        fieldnames = ['Nome', 'Tipo (Classe)', 'Quantidade Publicada', 'Quantidade Rascunho']
+        writer = csv.writer(response, fieldnames=fieldnames)
+        writer.writerows([str(v) for lst in data for k, v in lst.items()])
+        # for row in data:
+        # writer.writerow(data)
+
+        return response
+
+class PluginsList(CSVResponseMixin, ListView):
     template_name = 'djangocms_dashboard/plugins_list.html'
     model = CMSPlugin
+
+    def get(self, request, *args, **kwargs):
+        range = self.request.GET.get("range") or None
+        comparation = self.request.GET.get("comparation") or None
+        keyword = self.request.GET.get("keyword") or None
+        fields = self.request.GET.get("fields_search") or None
+        plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
+        plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
+
+        qs = self.get_plugins_list(plugins_filtered)
+
+        return self.render_to_csv(qs)
 
     def lookingfor_plugins(self, keyword, plugins_list):
         if keyword:
@@ -98,18 +140,6 @@ class PluginsList(ListView):
 
         return context
 
-    def some_view(self):
-        # Cria o objeto HttpResponse com o cabeçalho CSV apropriado.
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=somefilename.csv'
-
-        writer = csv.writer(response)
-        writer.writerow(['First row', 'Foo', 'Bar', 'Baz'])
-        writer.writerow(['Second row', 'A', 'B', 'C', '"Testing"', "Here's a quote"])
-
-        return response
-
-
     def get_queryset(self):
         range = self.request.GET.get("range") or None
         comparation = self.request.GET.get("comparation") or None
@@ -119,15 +149,11 @@ class PluginsList(ListView):
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
 
         qs = self.get_plugins_list(plugins_filtered)
-
         paginator = Paginator(qs, 10)
         page = self.request.GET.get('page')
         if page is None:
             page = 1
-        self.some_view()
         return paginator.page(page)
-
-
 
 
 plugins_list = PluginsList.as_view()

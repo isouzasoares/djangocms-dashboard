@@ -39,20 +39,6 @@ class CSVResponseMixin(object):
     csv_filename = 'csvfile.csv'
 
 
-        # writer = csv.writer(response)
-        # for lst in context:
-        #     url = lst['url']
-        #     qtde = lst['amount_published']
-        #     del lst['amount']
-        #     del lst['url']
-        #     lst['amount_published'] = lst['type']
-        #     lst['type'] = qtde
-        #     lst[5] = url
-
-        #     writer.writerow(list(lst.values()))
-        # return response
-
-
 class PluginsList(ListView):
     template_name = 'djangocms_dashboard/plugins_list.html'
     model = CMSPlugin
@@ -136,8 +122,16 @@ class PluginsList(ListView):
         writer = csv.writer(response)
         writer.writerow(['Lista de Plugins Dashboard'])
         writer.writerow(['Nome', 'Tipo (Classe)', 'Quantidade Publicada', 'Quantidade Rascunho', 'Url de acesso'])
-        for item in self.object_list:
-            writer.writerow(item.values())
+        for lst in self.object_list:
+            url = lst['url']
+            qtde = lst['amount_published']
+            del lst['amount']
+            del lst['url']
+            lst['amount_published'] = lst['type']
+            lst['type'] = qtde
+            lst[5] = url
+
+            writer.writerow(list(lst.values()))
 
         return response
 

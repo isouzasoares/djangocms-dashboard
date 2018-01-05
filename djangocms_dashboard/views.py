@@ -35,10 +35,6 @@ def limpar_nome(nome):
     return remover_acentos(sem_espacos).lower()
 
 
-class CSVResponseMixin(object):
-    csv_filename = 'csvfile.csv'
-
-
 class PluginsList(ListView):
     template_name = 'djangocms_dashboard/plugins_list.html'
     model = CMSPlugin

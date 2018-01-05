@@ -12,7 +12,7 @@ from django.template.defaultfilters import slugify
 from .forms import DashboardFieldsForm
 from django.views.generic import DetailView, ListView
 from unicodedata import normalize
-import csv
+import unicodecsv as csv
 from django.http import HttpResponse
 
 

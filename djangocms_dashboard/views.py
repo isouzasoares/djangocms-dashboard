@@ -38,34 +38,35 @@ def limpar_nome(nome):
 class CSVResponseMixin(object):
     csv_filename = 'csvfile.csv'
 
+
+        # writer = csv.writer(response)
+        # for lst in context:
+        #     url = lst['url']
+        #     qtde = lst['amount_published']
+        #     del lst['amount']
+        #     del lst['url']
+        #     lst['amount_published'] = lst['type']
+        #     lst['type'] = qtde
+        #     lst[5] = url
+
+        #     writer.writerow(list(lst.values()))
+        # return response
+
+
+class PluginsList(ListView):
+    template_name = 'djangocms_dashboard/plugins_list.html'
+    model = CMSPlugin
+    csv_filename = 'csvfile.csv'
+    paginate_by = 10
+
     def get_csv_filename(self):
         return self.csv_filename
 
-    def render_to_csv(self, data):
-        response = HttpResponse(content_type='text/csv')
-        cd = 'attachment; filename="{0}"'.format(self.get_csv_filename())
-        response['Content-Disposition'] = cd
-
-        writer = csv.writer(response)
-        writer.writerow(['Lista de Plugins Dashboard'])
-        writer.writerow(['Nome', 'Tipo (Classe)', 'Quantidade Publicada', 'Quantidade Rascunho', 'Url de acesso'])
-        for lst in data:
-            url = lst['url']
-            qtde = lst['amount_published']
-            del lst['amount']
-            del lst['url']
-            lst['amount_published'] = lst['type']
-            lst['type'] = qtde
-            lst[5] = url
-
-            writer.writerow(list(lst.values()))
+    def render_to_response(self, context, **response_kwargs):
+        response = super(PluginsList, self).render_to_response(context, **response_kwargs)
+        if self.request.GET.get('export', '') == 'csv':
+            response = self.get_csv_response()
         return response
-
-class PluginsList(CSVResponseMixin, ListView):
-    template_name = 'djangocms_dashboard/plugins_list.html'
-    model = CMSPlugin
-
-
 
     def lookingfor_plugins(self, keyword, plugins_list):
         if keyword:
@@ -114,17 +115,8 @@ class PluginsList(CSVResponseMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(PluginsList, self).get_context_data(**kwargs)
-        form = DashboardFieldsForm()
-
-        parametros = ''
-        for key in self.request.GET:
-            if key is not 'page' and key != 'page':
-                value = self.request.GET.get(key) or None
-                if value is not None:
-                    parametros += '&{key}={value}'.format(key=key, value=value)
-
-        context.update({'forms': form, 'parametros': parametros})
-
+        form = DashboardFieldsForm(self.request.GET)
+        context.update({'forms': form})
         return context
 
     def get_queryset(self):
@@ -135,29 +127,22 @@ class PluginsList(CSVResponseMixin, ListView):
         plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
         plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
 
-        qs = self.get_plugins_list(plugins_filtered)
-        paginator = Paginator(qs, 10)
-        page = self.request.GET.get('page')
-        if page is None:
-            page = 1
-        return paginator.page(page)
+        return self.get_plugins_list(plugins_filtered)
 
+    def get_csv_response(self):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="%s"' % self.get_csv_filename()
 
-    def export_csv(self, request, *args, **kwargs):
-        range = self.request.GET.get("range") or None
-        comparation = self.request.GET.get("comparation") or None
-        keyword = self.request.GET.get("keyword") or None
-        fields = self.request.GET.get("fields_search") or None
-        plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
-        plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
+        writer = csv.writer(response)
+        writer.writerow(['Lista de Plugins Dashboard'])
+        writer.writerow(['Nome', 'Tipo (Classe)', 'Quantidade Publicada', 'Quantidade Rascunho', 'Url de acesso'])
+        for item in self.object_list:
+            writer.writerow(item.values())
 
-        qs = self.get_plugins_list(plugins_filtered)
-
-        return self.render_to_csv(qs)
+        return response
 
 
 plugins_list = PluginsList.as_view()
-export = PluginsList.export_csv()
 
 
 class PluginsDetail(DetailView):
@@ -205,10 +190,6 @@ class ApphooksList(ListView):
     template_name = 'djangocms_dashboard/apphooks_list.html'
     model = Page
 
-    def get_context_data(self, **kwargs):
-        ctx = super(ApphooksList, self).get_context_data(**kwargs)
-        return ctx
-
     def get_queryset(self):
         # qs = super(ApphooksList, self).get_queryset()
         qs = []
@@ -225,7 +206,9 @@ class ApphooksList(ListView):
 
         return qs
 
+
 apphooks_list = ApphooksList.as_view()
+
 
 class ApphooksDetail(DetailView):
     model = Page

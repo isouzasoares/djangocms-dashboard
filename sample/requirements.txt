@@ -24,4 +24,3 @@ olefile==0.44
 Pillow==4.2.1
 six==1.10.0
 Unidecode==0.4.21
-decorate-url==1.1

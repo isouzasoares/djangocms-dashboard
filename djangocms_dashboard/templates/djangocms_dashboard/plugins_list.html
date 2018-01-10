@@ -22,9 +22,15 @@
 
             <button type="submit">Buscar</button>
 
+            <a href="{% url 'plugins_list' %}?export=csv">Exportar Lista de Plugins </a>
+
             </div>
     </table>
 </form>
+<form>
+
+
+
 <table class="table">
 
   <thead>
@@ -36,7 +42,7 @@
     </tr>
   </thead>
   <tbody>
-{% for object in object_list %}
+{% for object in page_obj %}
     <tr>
       <td><a href="{{ object.url }}" target="_blank">{{ object.name }}</a></td>
       <td>{{ object.type }}</td>
@@ -46,25 +52,25 @@
 {% endfor %}
   {% if not object_list %}
     <tr><td colspan="4">* NENHUM PLUGIN ENCONTRADO</td></tr>
-{% endif %}
+  {% endif %}
 
   </tbody>
 </table>
 
 <div class="pagination">
     <span class="step-links">
-        {% if object_list.has_previous %}
+        {% if page_obj.has_previous %}
             <a href="?page=1{{parametros}}">&laquo; </a>
-            <a href="?page={{ object_list.previous_page_number }}{{parametros}}">Anterior</a>
+            <a href="?page={{ page_obj.previous_page_number }}{{parametros}}">Anterior</a>
         {% endif %}
 
        <span class="current">
-            Página {{ object_list.number }} de {{ object_list.paginator.num_pages }}.
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}.
         </span>
 
-       {% if object_list.has_next %}
-            <a href="?page={{ object_list.next_page_number }}{{parametros}}">Próxima</a>
-            <a href="?page={{ object_list.paginator.num_pages }}{{parametros}}"> &raquo;</a>
+       {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{{parametros}}">Próxima</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{{parametros}}"> &raquo;</a>
         {% endif %}
     </span>
 </div>

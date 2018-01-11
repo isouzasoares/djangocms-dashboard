@@ -19,6 +19,7 @@ setup(
     install_requires=[
         'Django>=1.9.7',
         'django-cms>=3.4.1',
+        'unicodecsv>=0.14.0',
     ],
     include_package_data=True,
     #zip_safe=False,

@@ -11,28 +11,15 @@ from django.shortcuts import render
 from django.views.generic import DetailView, ListView
 
 import unicodecsv as csv
-from unicodedata import normalize
 
 from .forms import DashboardFieldsForm
+from .utils import limpar_nome
 
 
 try:
     from django.core.urlresolvers import reverse
 except ImportError:
     from django.urls import reverse
-
-
-def remover_espacos(n):
-    return ' '.join(n.split())
-
-
-def remover_acentos(txt):
-    return normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
-
-
-def limpar_nome(nome):
-    sem_espacos = remover_espacos(nome)
-    return remover_acentos(sem_espacos).lower()
 
 
 class PluginsList(ListView):

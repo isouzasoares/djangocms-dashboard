@@ -1,38 +1,25 @@
 # -*- coding: utf-8 -*-
-from django.core.paginator import Paginator
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-
+from __future__ import unicode_literals
 from cms.apphook_pool import apphook_pool
 from cms.models.pagemodel import Page
 from cms.models.pluginmodel import CMSPlugin
-from cms.plugin_pool import plugin_pool, PluginPool
-from django.template.defaultfilters import slugify
+from cms.plugin_pool import plugin_pool
+
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.generic import DetailView, ListView
+
+import unicodecsv as csv
 
 from .forms import DashboardFieldsForm
-from django.views.generic import DetailView, ListView
-from unicodedata import normalize
-import unicodecsv as csv
-from django.http import HttpResponse
+from .utils import limpar_nome
 
 
 try:
     from django.core.urlresolvers import reverse
 except ImportError:
     from django.urls import reverse
-
-
-def remover_espacos(n):
-    return ' '.join(n.split())
-
-
-def remover_acentos(txt):
-    return normalize('NFKD', txt).encode('ASCII', 'ignore').decode('ASCII')
-
-
-def limpar_nome(nome):
-    sem_espacos = remover_espacos(unicode(nome))
-    return remover_acentos(sem_espacos).lower()
 
 
 class PluginsList(ListView):
@@ -45,7 +32,9 @@ class PluginsList(ListView):
         return self.csv_filename
 
     def render_to_response(self, context, **response_kwargs):
-        response = super(PluginsList, self).render_to_response(context, **response_kwargs)
+        response = super(PluginsList, self).render_to_response(
+            context, **response_kwargs
+        )
         if self.request.GET.get('export', '') == 'csv':
             response = self.get_csv_response()
         return response
@@ -55,26 +44,37 @@ class PluginsList(ListView):
             plugins_found = []
             for plugin in plugins_list:
                 if keyword:
-                    keyword = unicode(keyword)
-                    plugins_found.append(plugin) if limpar_nome(keyword) in limpar_nome(plugin.name) or limpar_nome(keyword) in limpar_nome(unicode(plugin.value)) else None
+                    name = limpar_nome(plugin.name)
+                    value = limpar_nome(plugin.value)
+                    keyword = limpar_nome(keyword)
+                    if keyword in name or keyword in value:
+                        plugins_found.append(plugin)
             return plugins_found
         return plugins_list
 
     def filter_plugins(self, plugins_list, range, comparation, fields):
         if range and comparation:
+            range = int(range)
             plugins_filtered = []
 
             for plugin in plugins_list:
-                plugin.type = unicode(plugin.__name__)
-                plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type, placeholder__page__publisher_is_draft=True).count() if 'draft' in fields else None
-                plugin.amount = CMSPlugin.objects.filter(plugin_type=plugin.type, placeholder__page__publisher_is_draft=False).count() if 'published' in fields else CMSPlugin.objects.filter(plugin_type=plugin.type).count()
+                plugin.type = plugin.__name__
+                filters = {
+                    'plugin_type': plugin.type,
+                    'placeholder__isnull': False,
+                }
+                if 'draft' in fields:
+                    filters['placeholder__page__publisher_is_draft'] = True
+                elif 'published' in fields:
+                    filters['placeholder__page__publisher_is_draft'] = False
+                plugin.amount = CMSPlugin.objects.filter(**filters).count()
 
-                if 'gte' in comparation:
-                    plugins_filtered.append(plugin) if plugin.amount > int(range) else None
-                elif 'lte' in comparation:
-                    plugins_filtered.append(plugin) if plugin.amount < int(range) else None
-                elif 'equ' in comparation:
-                    plugins_filtered.append(plugin) if plugin.amount == int(range) else None
+                if 'gte' in comparation and plugin.amount > range:
+                    plugins_filtered.append(plugin)
+                elif 'lte' in comparation and plugin.amount < range:
+                    plugins_filtered.append(plugin)
+                elif 'equ' in comparation and plugin.amount == range:
+                    plugins_filtered.append(plugin)
 
             return plugins_filtered
         return plugins_list
@@ -83,14 +83,23 @@ class PluginsList(ListView):
         plugins_to_show = []
         for plugin in plugins:
             plugin_info = {}
-            plugin_info['name'] = unicode(plugin.name)
-            plugin_info['type'] = unicode(plugin.__name__)
-            plugin_info['amount_published'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
-                                                                       placeholder__page__publisher_is_draft=False).count()
-            plugin_info['amount'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type']).count()
-            plugin_info['amount_draft'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
-                                                                   placeholder__page__publisher_is_draft=True).count()
-            plugin_info['url'] = reverse('plugin_detail', kwargs={'plugin_type': plugin_info['type']})
+            plugin_info['name'] = plugin.name
+            plugin_info['type'] = plugin.__name__
+
+            qs = CMSPlugin.objects.filter(plugin_type=plugin_info['type'])
+            qs_pub = qs.filter(placeholder__page__publisher_is_draft=False)
+            qs_draft = qs.filter(placeholder__page__publisher_is_draft=True)
+
+            plugin_info.update({
+                'amount': qs.count(),
+                'amount_published': qs_pub.count(),
+                'amount_draft': qs_draft.count(),
+            })
+
+            plugin_info['url'] = reverse(
+                'plugin_detail',
+                kwargs={'plugin_type': plugin_info['type']}
+            )
             plugins_to_show.append(plugin_info)
 
         return plugins_to_show
@@ -102,22 +111,30 @@ class PluginsList(ListView):
         return context
 
     def get_queryset(self):
-        range = self.request.GET.get("range") or None
-        comparation = self.request.GET.get("comparation") or None
-        keyword = self.request.GET.get("keyword") or None
-        fields = self.request.GET.get("fields_search") or None
-        plugins_found = self.lookingfor_plugins(keyword, plugin_pool.get_all_plugins())
-        plugins_filtered = self.filter_plugins(plugins_found, range, comparation, fields)
+        range = self.request.GET.get("range")
+        comparation = self.request.GET.get("comparation")
+        keyword = self.request.GET.get("keyword")
+        fields = self.request.GET.get("fields_search")
+        plugins_found = self.lookingfor_plugins(
+            keyword, plugin_pool.get_all_plugins()
+        )
+        plugins_filtered = self.filter_plugins(
+            plugins_found, range, comparation, fields
+        )
 
         return self.get_plugins_list(plugins_filtered)
 
     def get_csv_response(self):
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="%s"' % self.get_csv_filename()
+        csv_filename = 'attachment; filename="%s"' % self.get_csv_filename()
+        response['Content-Disposition'] = csv_filename
 
         writer = csv.writer(response)
         writer.writerow(['Lista de Plugins Dashboard'])
-        writer.writerow(['Nome', 'Tipo (Classe)', 'Quantidade Publicada', 'Quantidade Rascunho', 'Url de acesso'])
+        writer.writerow([
+            'Nome', 'Tipo (Classe)', 'Quantidade Publicada',
+            'Quantidade Rascunho', 'Url de acesso',
+        ])
         for lst in self.object_list:
             url = lst['url']
             qtde = lst['amount_published']
@@ -150,16 +167,25 @@ class PluginsDetail(DetailView):
             ctx['type'] = qs.first().plugin_type
             ctx['instances'] = []
             for i in qs:
+                pk = str(i.pk)
+                base_url_page = u'/admin/cms/page/%s/' + pk
                 # TODO: arrumar URL (delete_url e edit_url hard coded)
-                ctx['instances'].append({
-                    'title': i.page.get_title() if i.page else 'Placeholder Field',
-                    'url': u'/' + i.page.get_path() if i.page else '',
+                instance = {
+                    'title': 'PlaceholderField',
+                    'url': '',
                     'placeholder_label': i.placeholder.get_label(),
                     'placeholder_static': i.placeholder.is_static,
-                    'not_published': i.page.publisher_is_draft if i.page else '',
-                    'delete_url': u'/admin/cms/page/delete-plugin/' + unicode(i.pk),
-                    'edit_url': u'/admin/cms/page/edit-plugin/' + unicode(i.pk),
-                })
+                    'not_published': '',
+                    'delete_url': base_url_page % 'delete-plugin',
+                    'edit_url': base_url_page % 'edit-plugin',
+                }
+                if i.page:
+                    instance.update({
+                        'title': i.page.get_title(),
+                        'url': u'/' + i.page.get_path(),
+                        'not_published': i.page.publisher_is_draft,
+                    })
+                ctx['instances'].append(instance)
         return ctx
 
     def get_object(self, queryset=None):
@@ -186,11 +212,16 @@ class ApphooksList(ListView):
         apphook_tuples = apphook_pool.get_apphooks()
         for apphook_tuple in apphook_tuples:
             apphook_info = {}
-            apphook_info['name'] = unicode(apphook_tuple[1])
-            apphook_info['class'] = unicode(apphook_tuple[0])
-            apphook_info['amount'] = Page.objects.filter(application_urls=apphook_tuple[0],
-                                                         publisher_is_draft=False).count()
-            apphook_info['url'] = reverse('apphook_detail', kwargs={'apphook_class': apphook_info['class']})
+            apphook_info['name'] = apphook_tuple[1]
+            apphook_info['class'] = apphook_tuple[0]
+            apphook_info['amount'] = Page.objects.filter(
+                application_urls=apphook_tuple[0],
+                publisher_is_draft=False
+            ).count()
+            apphook_info['url'] = reverse(
+                'apphook_detail',
+                kwargs={'apphook_class': apphook_info['class']}
+            )
 
             qs.append(apphook_info)
 
@@ -208,7 +239,10 @@ class ApphooksDetail(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super(ApphooksDetail, self).get_context_data(**kwargs)
         apphook_class = self.kwargs.get('apphook_class')
-        pages = Page.objects.filter(application_urls=apphook_class, publisher_is_draft=False).all()
+        pages = Page.objects.filter(
+            application_urls=apphook_class,
+            publisher_is_draft=False
+        )
         if pages:
             for page in pages:
                 ctx['instances'].append({
@@ -221,125 +255,11 @@ class ApphooksDetail(DetailView):
 
     def get_object(self, queryset=None):
         apphook_class = self.kwargs.get('apphook_class')
-        obj = Page.objects.filter(application_urls=apphook_class, publisher_is_draft=False).first
+        obj = Page.objects.filter(
+            application_urls=apphook_class,
+            publisher_is_draft=False
+        ).first()
         return obj
 
 
 apphook_detail = ApphooksDetail.as_view()
-
-
-
-
-# def get_plugins_list(context, all_plugins, comparation, range):
-#     context['plugins_info'] = []
-#     for plugin_class in all_plugins:
-#         plugin_info = {}
-#         plugin_info['name'] = unicode(plugin_class.name)
-#         plugin_info['type'] = unicode(plugin_class.__name__)
-#         plugin_info['amount_published'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
-#                                                                    placeholder__page__publisher_is_draft=False).count()
-#         plugin_info['amount'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type']).count()
-#         plugin_info['amount_draft'] = CMSPlugin.objects.filter(plugin_type=plugin_info['type'],
-#                                                                placeholder__page__publisher_is_draft=True).count()
-#         plugin_info['url'] = reverse('plugin_detail', kwargs={'plugin_type': plugin_info['type']})
-#
-#         if not comparation or not range:
-#             context['plugins_info'].append(plugin_info)
-#         else:
-#             if 'gte' in comparation:
-#                 context['plugins_info'].append(plugin_info) if plugin_info['amount'] > int(range) else None
-#             elif 'lte' in comparation:
-#                 context['plugins_info'].append(plugin_info) if plugin_info['amount'] < int(range) else None
-#             elif 'equ' in comparation:
-#                 context['plugins_info'].append(plugin_info) if plugin_info['amount'] == int(range) else None
-#
-#     return context
-#
-# @login_required()
-# def plugins_list(request):
-#     context = {}
-#     plugin_classes = plugin_pool.get_all_plugins()
-#     form = DashboardFieldsForm()
-#     range = request.POST.get("range") or None
-#     comparation = request.POST.get("comparation") or None
-#
-#     get_plugins_list(context, plugin_classes, comparation, range)
-#     context.update({'forms': form})
-#
-#     return render(request, 'djangocms_dashboard/plugins_list.html', context)
-
-
-
-# @login_required()
-# def plugin_detail(request, plugin_type):
-#     context = {}
-#     # context['name'] = plugin_name
-#     # context['type'] = plugin_type
-#     # context['amount'] = plugin_amount
-#
-#     instances = CMSPlugin.objects.filter(plugin_type=plugin_type)
-#     if instances:
-#         context['amount'] = instances.count()
-#         context['name'] = instances.first().get_plugin_name()
-#         context['type'] = instances.first().plugin_type
-#         context['instances'] = []
-#         for i in instances:
-#     #TODO: arrumar URL (delete_url e edit_url hard coded)
-#             context['instances'].append({
-#                 'title': i.page.get_title() if i.page else 'Placeholder Field',
-#                 'url': u'/' + i.page.get_path() if i.page else '',
-#                 'placeholder_label': i.placeholder.get_label(),
-#                 'placeholder_static': i.placeholder.is_static,
-#                 'not_published': i.page.publisher_is_draft if i.page else '',
-#                 'delete_url': u'/admin/cms/page/delete-plugin/' + unicode(i.pk),
-#                 'edit_url': u'/admin/cms/page/edit-plugin/' + unicode(i.pk),
-#             })
-#     # pages = [_.]
-#
-#     return render(request, 'djangocms_dashboard/plugin_detail.html', context)
-
-
-
-# @login_required()
-# def get_apphook_class_name(apphook_obj):
-#     return type(apphook_obj).__name__
-
-
-# @login_required()
-# def apphooks_list(request):
-#     context = {}
-#     apphook_tuples = apphook_pool.get_apphooks()
-#     context['apphooks_info'] = []
-#     for apphook_tuple in apphook_tuples:
-#         apphook_info = {}
-#         apphook_info['name'] = unicode(apphook_tuple[1])
-#         apphook_info['class'] = unicode(apphook_tuple[0])
-#         apphook_info['amount'] = Page.objects.filter(application_urls=apphook_tuple[0], publisher_is_draft=False).count()
-#         apphook_info['url'] = reverse('apphook_detail', kwargs={'apphook_class': apphook_info['class']})
-#
-#         context['apphooks_info'].append(apphook_info)
-#
-#
-#     return render(request, 'djangocms_dashboard/apphooks_list.html', context)
-
-
-
-
-
-# @login_required()
-# def apphook_detail(request, apphook_class):
-#     context = {}
-#     pages = Page.objects.filter(application_urls=apphook_class, publisher_is_draft=False)
-#     context['class'] = apphook_class
-#     context['amount'] = pages.count()
-#     context['instances'] = []
-#
-#     if pages:
-#         for page in pages:
-#             context['instances'].append({
-#                 'title': page.get_title(),
-#                 'url': u'/' + page.get_path(),
-#                 'not_published': page.publisher_is_draft
-#             })
-#
-#     return render(request, 'djangocms_dashboard/apphook_detail.html', context)

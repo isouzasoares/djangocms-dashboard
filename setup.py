@@ -18,7 +18,6 @@ setup(
     packages=find_packages(exclude=('tests.*', 'tests', 'example')),
     install_requires=[
         'Django>=1.9.7',
-        'django-cms>=3.4.1',
     ],
     include_package_data=True,
     #zip_safe=False,

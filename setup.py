@@ -18,6 +18,7 @@ setup(
     packages=find_packages(exclude=('tests.*', 'tests', 'example')),
     install_requires=[
         'Django>=1.9.7',
+        'unicodecsv>=0.14.0',
     ],
     include_package_data=True,
     #zip_safe=False,

@@ -37,6 +37,21 @@ class PluginsList(ListView):
         )
         if self.request.GET.get('export', '') == 'csv':
             response = self.get_csv_response()
+        
+        desc = self.request.GET.get('descp', '') or self.request.GET.get('descr', '')
+        if desc == '':
+            context.update({'order': False })
+        else:
+            if (self.request.GET.get('descp', '') != ''): 
+                ordenacao = '&descp=' 
+            else: 
+                ordenacao = '&descr='
+            
+            desc = False if desc == 'False' else True
+            ordenacao += str(desc)
+            context.update({'order': not desc })
+            context.update({'ordenacao': ordenacao })
+
         return response
 
     def lookingfor_plugins(self, keyword, plugins_list):
@@ -102,6 +117,9 @@ class PluginsList(ListView):
             )
             plugins_to_show.append(plugin_info)
 
+        if (self.request.GET.get('descp', '') or self.request.GET.get('descr', '')):
+            plugins_to_show = self.ordena_lista(plugins_to_show)
+
         return plugins_to_show
 
     def get_context_data(self, **kwargs):
@@ -147,6 +165,23 @@ class PluginsList(ListView):
             writer.writerow(list(lst.values()))
 
         return response
+
+    def ordena_lista(self, lista_plugins):        
+        desc = self.request.GET.get('descp', '') or self.request.GET.get('descr', '')
+        
+        if desc == '':
+            descendente = False
+        else:
+            descendente = False if desc == 'False' else True
+
+            if self.request.GET.get('descp', '') != '':
+                order_by =  'amount_published'
+            else:
+                order_by =  'amount_draft'
+
+        newlist = sorted(lista_plugins, key=lambda k: k[order_by], reverse=descendente) 
+
+        return newlist
 
 
 plugins_list = PluginsList.as_view()
@@ -205,6 +240,22 @@ def home(request):
 class ApphooksList(ListView):
     template_name = 'djangocms_dashboard/apphooks_list.html'
     model = Page
+
+    def get_context_data(self, **kwargs):
+        context = super(ApphooksList, self).get_context_data(**kwargs)
+        desc = self.request.GET.get('desc', '')
+
+        apphooks_list = context['object_list']
+
+        if self.request.GET.get('desc', '') != '':
+            desc = False if desc == 'False' else True
+            apphooks_list = sorted(apphooks_list, key=lambda k: k[u'amount'], reverse=desc)
+            context.update({'object_list': apphooks_list})
+            context.update({'order': not desc })
+        else:
+            context.update({'order': True })
+
+        return context
 
     def get_queryset(self):
         # qs = super(ApphooksList, self).get_queryset()

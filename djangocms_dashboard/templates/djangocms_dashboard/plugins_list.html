@@ -32,13 +32,13 @@
 
 
 <table class="table">
-
+    
   <thead>
     <tr>
       <th>Nome</th>
       <th>Tipo (Classe)</th>
-      <th>Quantidade Publicada</th>
-      <th>Quantidade Rascunho</th>
+        <th><a href="?page={{ page_obj.number }}&descp={{ order }}">Quantidade Publicada <img src="{% static 'ordenar.png' %}"style="margin: 5px 5px 0px 0px; width: 15px; height: 15px;"></a></th>
+        <th><a href="?page={{ page_obj.number }}&descr={{ order }}">Quantidade Rascunho <img src="{% static 'ordenar.png' %}"style="margin: 5px 5px 0px 0px; width: 15px; height: 15px;"></a></th>
     </tr>
   </thead>
   <tbody>
@@ -60,8 +60,8 @@
 <div class="pagination">
     <span class="step-links">
         {% if page_obj.has_previous %}
-            <a href="?page=1{{parametros}}">&laquo; </a>
-            <a href="?page={{ page_obj.previous_page_number }}{{parametros}}">Anterior</a>
+            <a href="?page=1{{parametros}}{{ordenacao}}">&laquo; </a>
+            <a href="?page={{ page_obj.previous_page_number }}{{parametros}}{{ordenacao}}">Anterior</a>
         {% endif %}
 
        <span class="current">
@@ -69,8 +69,8 @@
         </span>
 
        {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}{{parametros}}">Próxima</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}{{parametros}}"> &raquo;</a>
+            <a href="?page={{ page_obj.next_page_number }}{{parametros}}{{ordenacao}}">Próxima</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{{parametros}}{{ordenacao}}"> &raquo;</a>
         {% endif %}
     </span>
 </div>

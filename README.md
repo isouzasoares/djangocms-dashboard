@@ -24,7 +24,7 @@ Quick start
 
     url(r'^djangocms_dashboard/', include('djangocms_dashboard.urls')),
 
-4. Start the development server and visit http://127.0.0.1:8000/dashboard/
+4. Start the development server and visit http://127.0.0.1:8000/djangocms_dashboard/
 
 
 
@@ -43,4 +43,4 @@ Configuração e primeiro acesso ao projeto:
     python manage.py createsuperuser
 
 4. Para acessar o projeto
-    127.0.0.1:8000/dashboard/
+    127.0.0.1:8000/djangocms_dashboard/
